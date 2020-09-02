@@ -8,20 +8,48 @@
  */
 
 import { ZWaveDriver } from '../driver/ZWaveDriver';
-import ZWave, { NodeInfo, Value, Notification } from 'openzwave-shared';
+import ZWave, {
+	NodeInfo, Value, Notification
+} from 'openzwave-shared';
 import { Datastore } from './Datastore';
 import { Logger } from 'tslog';
-import { NetworkNode, NetworkNodeCaps, NetworkNodeProperties, NetworkNodeStateEnum, NetworkNodeType } from './Node';
+import {
+	NetworkNode, NetworkNodeCaps, NetworkNodeProperties,
+	NetworkNodeStateEnum, NetworkNodeType
+} from './Node';
 
 
 let logger: Logger = new Logger({name: 'network-service'});
 
+
+export enum NetworkStatusEnum {
+	None 		= 0,
+	Starting	= 1,
+	Stopped		= 2,
+	Dead		= 3,
+	Sleep 		= 4,
+	Awake 		= 5,
+	Alive		= 6
+}
+
+export interface NetworkStatus {
+	state: NetworkStatusEnum;
+	str: string;
+	nodes_total: number;
+	nodes_alive: number;
+	nodes_asleep: number;
+	nodes_awake: number;
+	nodes_dead: number;
+}
 
 export class NetworkService {
 
 	private static instance: NetworkService;
 	private constructor() {
 		this._setup();
+		this._status = {} as NetworkStatus;
+		this._status.state = NetworkStatusEnum.Stopped;
+		this._updateStatus();
 	}
 	public static getInstance(): NetworkService {
 		if (!NetworkService.instance) {
@@ -32,6 +60,8 @@ export class NetworkService {
 
 	private _store: Datastore = new Datastore();
 	private _is_running: boolean = false;
+	private _is_scan_complete: boolean = false;
+	private _status: NetworkStatus;
 
 
 	private _setup(): void {
@@ -55,6 +85,9 @@ export class NetworkService {
 		driver.on("value changed", this._onValueChanged.bind(this));
 		driver.on("value refreshed", this._onValueRefreshed.bind(this));
 		driver.on("value removed", this._onValueRemoved.bind(this));
+
+
+		driver.on("scan complete", this._onScanComplete.bind(this));
 	}
 
 	// start/stop network
@@ -68,6 +101,8 @@ export class NetworkService {
 	start() {
 		logger.info("start network");
 		this._is_running = true;
+		this._is_scan_complete = false;
+		this._updateStatus();
 	}
 
 	/**
@@ -79,6 +114,8 @@ export class NetworkService {
 	stop() {
 		logger.info("stop network");
 		this._is_running = false;
+		this._is_scan_complete = false;
+		this._updateStatus();
 		this._store.clear();
 	}
 	
@@ -94,28 +131,33 @@ export class NetworkService {
 		logger.info(`adding node ${id}`);
 		if (!this._isRunning()) { return; }
 		this._store.nodeAdd(id);
+		this._updateStatus();
 	}
 
 	private _onNodeRemoved(id: number): void {
 		logger.info(`removing node ${id}`);
 		if (!this._isRunning()) { return; }
 		this._store.nodeRemove(id);
+		this._updateStatus();
 	}
 
 	private _onNodeReset(id: number): void {
 		logger.info(`resetting node ${id}`);
 		if (!this._isRunning()) { return; }
+		this._updateStatus();
 		// ??
 	}
 
 	private _onNodePollingEnabled(id: number): void {
 		logger.info(`enabling polling on node ${id}`);
 		if (!this._isRunning()) { return; }
+		this._updateStatus();
 	}
 
 	private _onNodePollingDisabled(id: number): void {
 		logger.info(`disabling polling on node ${id}`);
 		if (!this._isRunning()) { return; }
+		this._updateStatus();
 	}
 
 	private _onNodeAvailable(id: number, info: NodeInfo): void {
@@ -124,12 +166,14 @@ export class NetworkService {
 		this._store.nodeUpdated(id, info);
 		this._updateNodeCaps(id);
 		this._updateNodeProperties(id);
+		this._updateStatus();
 	}
 
 	private _onNodeNaming(id: number, info: NodeInfo): void {
 		logger.info(`node ${id} named`);
 		if (!this._isRunning()) { return; }
 		this._store.nodeUpdated(id, info);
+		this._updateStatus();
 	}
 
 	private _onNodeReady(id: number, info: NodeInfo): void {
@@ -137,6 +181,7 @@ export class NetworkService {
 		if (!this._isRunning()) { return; }
 		this._store.nodeUpdated(id, info);
 		this._store.markNodeReady(id);
+		this._updateStatus();
 		
 		// if the node is ready, then it is alive.
 		// or so we decided.
@@ -166,6 +211,7 @@ export class NetworkService {
 				node.state = {state: NetworkNodeStateEnum.Sleep, str: "sleep"};
 				break;
 		}
+		this._updateStatus();
 	}
 
 	// values
@@ -230,5 +276,82 @@ export class NetworkService {
 
 	getNodes(): NetworkNode[] {
 		return this._store.getNodes();
+	}
+
+	getStatus(): NetworkStatus {
+		this._updateStatus();
+		return this._status;	
+	}
+
+
+	private _onScanComplete(): void {
+		if (this._isRunning()) {
+			this._is_scan_complete = true;
+		}
+	}
+
+
+	private _updateStatus(): void {
+		let nodelst: NetworkNode[] = this._store.getNodes();
+
+		let nodes_total: number = nodelst.length;
+		let nodes_alive: number = 0;
+		let nodes_asleep: number = 0;
+		let nodes_awake: number = 0;
+		let nodes_dead: number = 0;
+		let nodes_unknown: number = 0;
+
+		nodelst.forEach( (node) => {
+			let node_state = node.state.state;
+			switch (node_state) {
+				case NetworkNodeStateEnum.Alive:
+					nodes_alive++;
+					break;
+				case NetworkNodeStateEnum.Awake:
+					nodes_awake++;
+					break;
+				case NetworkNodeStateEnum.Sleep:
+					nodes_asleep++;
+					break;
+				case NetworkNodeStateEnum.Dead:
+					nodes_dead++;
+					break;
+				default:
+					nodes_unknown++;
+					break;
+			}
+		});
+
+		let state: NetworkStatusEnum = NetworkStatusEnum.None;
+		let state_str: string = "";
+		if (!this._isRunning()) {
+			state = NetworkStatusEnum.Stopped;
+			state_str = "stopped";
+		} else if (this._isRunning() && !this._is_scan_complete) {
+			state = NetworkStatusEnum.Starting;
+			state_str = "starting";
+		} else if (nodes_alive > 0) {
+			state = NetworkStatusEnum.Alive;
+			state_str = "alive";
+		} else if (nodes_awake > 0) {
+			state = NetworkStatusEnum.Awake;
+			state_str = "awake";
+		} else if (nodes_asleep > 0) {
+			state = NetworkStatusEnum.Sleep;
+			state_str = "sleep";
+		} else if (nodes_dead > 0) {
+			state = NetworkStatusEnum.Dead;
+			state_str = "dead";
+		}
+
+		this._status = {
+			nodes_alive: nodes_alive,
+			nodes_asleep: nodes_asleep,
+			nodes_awake: nodes_awake,
+			nodes_dead: nodes_dead,
+			nodes_total: nodes_total,
+			state: state,
+			str: state_str
+		};
 	}
  }

@@ -18,7 +18,7 @@ import { ZWaveDriver, OZWDriverStatus } from '../driver/ZWaveDriver';
 import { ENOENT, ENODEV } from 'constants';
 import { ConfigService } from '../driver/ConfigService';
 import { SimpleReply } from './types';
-import { NetworkService } from '../network/NetworkService';
+import { NetworkService, NetworkStatus } from '../network/NetworkService';
 
 
 let logger: Logger = new Logger({name: "api-network"});
@@ -26,12 +26,12 @@ let driver: ZWaveDriver = ZWaveDriver.getInstance();
 let svc: NetworkService = NetworkService.getInstance();
 
 
-/*
+
 export interface NetworkStatusItem {
 	driver: OZWDriverStatus;
 	network: NetworkStatus;
 }
-*/
+
 
 @Route("/api/network")
 export class NetworkController extends Controller {
@@ -39,9 +39,12 @@ export class NetworkController extends Controller {
 	constructor() { super(); }
 
 	@Get('/status')
-	public async getNetworkStatus(): Promise<OZWDriverStatus> {
+	public async getNetworkStatus(): Promise<NetworkStatusItem> {
 		logger.debug("get network status");
-		return driver.getStatus();
+		return {
+			driver: driver.getStatus(),
+			network: svc.getStatus()
+		};
 	}
 
 	@Get('/devices')
