@@ -1,0 +1,346 @@
+{
+	"components": {
+		"examples": {},
+		"headers": {},
+		"parameters": {},
+		"requestBodies": {},
+		"responses": {},
+		"schemas": {
+			"OZWDriverStatus": {
+				"properties": {
+					"is_connected": {
+						"type": "boolean"
+					},
+					"is_ready": {
+						"type": "boolean"
+					},
+					"is_failed": {
+						"type": "boolean"
+					},
+					"is_scan_complete": {
+						"type": "boolean"
+					},
+					"is_db_ready": {
+						"type": "boolean"
+					},
+					"device": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"is_connected",
+					"is_ready",
+					"is_failed",
+					"is_scan_complete",
+					"is_db_ready",
+					"device"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"SimpleReply": {
+				"properties": {
+					"rc": {
+						"type": "number",
+						"format": "double"
+					},
+					"str": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"rc",
+					"str"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NetworkNodeInfo": {
+				"properties": {
+					"manufacturer": {
+						"type": "string"
+					},
+					"manufacturerid": {
+						"type": "string"
+					},
+					"product": {
+						"type": "string"
+					},
+					"producttype": {
+						"type": "string"
+					},
+					"productid": {
+						"type": "string"
+					},
+					"type": {
+						"type": "string"
+					},
+					"name": {
+						"type": "string"
+					},
+					"loc": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"manufacturer",
+					"manufacturerid",
+					"product",
+					"producttype",
+					"productid",
+					"type",
+					"name",
+					"loc"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NetworkNodeCaps": {
+				"properties": {
+					"is_controller": {
+						"type": "boolean"
+					},
+					"is_primary_controller": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"is_controller",
+					"is_primary_controller"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NetworkNodeProperties": {
+				"properties": {
+					"is_listening": {
+						"type": "boolean"
+					},
+					"is_routing": {
+						"type": "boolean"
+					},
+					"is_beaming": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"is_listening",
+					"is_routing",
+					"is_beaming"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NetworkNodeType": {
+				"properties": {
+					"is_switch": {
+						"type": "boolean"
+					},
+					"is_meter": {
+						"type": "boolean"
+					}
+				},
+				"required": [
+					"is_switch",
+					"is_meter"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NetworkNodeState": {
+				"enum": [
+					0,
+					1,
+					2,
+					3,
+					4,
+					5,
+					6
+				],
+				"type": "number"
+			},
+			"NetworkNode": {
+				"properties": {
+					"id": {
+						"type": "number",
+						"format": "double"
+					},
+					"info": {
+						"$ref": "#/components/schemas/NetworkNodeInfo"
+					},
+					"is_ready": {
+						"type": "boolean"
+					},
+					"capabilities": {
+						"$ref": "#/components/schemas/NetworkNodeCaps"
+					},
+					"properties": {
+						"$ref": "#/components/schemas/NetworkNodeProperties"
+					},
+					"type": {
+						"$ref": "#/components/schemas/NetworkNodeType"
+					},
+					"state": {
+						"$ref": "#/components/schemas/NetworkNodeState"
+					},
+					"last_seen": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"info",
+					"is_ready",
+					"capabilities",
+					"properties",
+					"type",
+					"state",
+					"last_seen"
+				],
+				"type": "object",
+				"additionalProperties": false
+			}
+		},
+		"securitySchemes": {}
+	},
+	"info": {
+		"title": "ozw-backend",
+		"version": "1.0.0",
+		"description": "Backend for an openzwave frontend dashboard",
+		"license": {
+			"name": "EUPL-1.2"
+		},
+		"contact": {
+			"name": "Joao Eduardo Luis"
+		}
+	},
+	"openapi": "3.0.0",
+	"paths": {
+		"/api/network/status": {
+			"get": {
+				"operationId": "GetNetworkStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/OZWDriverStatus"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/network/devices": {
+			"get": {
+				"operationId": "GetAvailableDevices",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"type": "string"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/network/start": {
+			"post": {
+				"operationId": "StartNetwork",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SimpleReply"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/network/stop": {
+			"post": {
+				"operationId": "StopNetwork",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/SimpleReply"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/network/ready": {
+			"get": {
+				"operationId": "GetIsReady",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/nodes": {
+			"get": {
+				"operationId": "GetNodes",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/NetworkNode"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		}
+	},
+	"servers": [
+		{
+			"url": "/"
+		}
+	]
+}
