@@ -8,10 +8,10 @@
  */
 
 import { ZWaveDriver } from '../driver/ZWaveDriver';
-import ZWave, { NodeInfo, Value } from 'openzwave-shared';
+import ZWave, { NodeInfo, Value, Notification } from 'openzwave-shared';
 import { Datastore } from './Datastore';
 import { Logger } from 'tslog';
-import { NetworkNode } from './Node';
+import { NetworkNode, NetworkNodeCaps, NetworkNodeProperties, NetworkNodeStateEnum, NetworkNodeType } from './Node';
 
 
 let logger: Logger = new Logger({name: 'network-service'});
@@ -122,6 +122,8 @@ export class NetworkService {
 		logger.info(`node ${id} is available`);
 		if (!this._isRunning()) { return; }
 		this._store.nodeUpdated(id, info);
+		this._updateNodeCaps(id);
+		this._updateNodeProperties(id);
 	}
 
 	private _onNodeNaming(id: number, info: NodeInfo): void {
@@ -135,7 +137,12 @@ export class NetworkService {
 		if (!this._isRunning()) { return; }
 		this._store.nodeUpdated(id, info);
 		this._store.markNodeReady(id);
-		// XXX: update state, caps, etc.
+		
+		// if the node is ready, then it is alive.
+		// or so we decided.
+		let node: NetworkNode = this._store.getNode(id);
+		node.state.state = NetworkNodeStateEnum.Alive;
+		node.state.str = "alive";
 	}
 
 	private _onNodeNotification(
@@ -144,12 +151,39 @@ export class NetworkService {
 			str: string): void {
 		logger.info(`notification on node ${id}: ${str}, `, notification);
 		if (!this._isRunning()) { return; }
-		// XXX: update node state, etc.
+		let node: NetworkNode = this._store.getNode(id);
+		switch (notification) {
+			case Notification.NodeAlive:
+				node.state = {state: NetworkNodeStateEnum.Alive, str: "alive"};
+				break;
+			case Notification.NodeAwake:
+				node.state = {state: NetworkNodeStateEnum.Awake, str: "awake"};
+				break;
+			case Notification.NodeDead:
+				node.state = {state: NetworkNodeStateEnum.Dead, str: "dead"};
+				break;
+			case Notification.NodeSleep:
+				node.state = {state: NetworkNodeStateEnum.Sleep, str: "sleep"};
+				break;
+		}
 	}
 
 	// values
 	private _onValueAdded(id: number, cls: number, value: Value) {
 		if (!this._isRunning()) { return; }
+		this._store.valueAdd(id, cls, value);
+
+		let node: NetworkNode = this._store.getNode(id);
+		let node_type: NetworkNodeType = node.type;
+		switch (cls) {
+			case 0x25: // COMMAND_CLASS_SWITCH_BINARY
+			case 0x26: // COMMAND_CLASS_SWITH_MULTILEVEL
+				node_type.is_switch = true;
+				break;
+			case 0x32: // COMMAND_CLASS_METER
+				node_type.is_meter = true;
+				break;
+		}
 	}
 
 	private _onValueChanged(id: number, cls: number, value: Value) {
@@ -164,8 +198,35 @@ export class NetworkService {
 			id: number, cls: number,
 			inst: number, idx: number) {
 		if (!this._isRunning()) { return; }
+		this._store.valueRemove(id, cls, inst, idx);
 	}
 
+
+	private _updateNodeCaps(id: number) {
+		let node: NetworkNode = this._store.getNode(id);
+		let driver: ZWave = ZWaveDriver.getDriver();
+		let is_primary_controller = false;
+		let is_controller = (driver.getControllerNodeId() === id);
+		if (is_controller) {
+			is_primary_controller = driver.isPrimaryController();
+		}
+		let caps: NetworkNodeCaps = {
+			is_controller: is_controller,
+			is_primary_controller: is_primary_controller
+		}
+		node.capabilities = caps;
+	}
+
+	private _updateNodeProperties(id: number) {
+		let node: NetworkNode = this._store.getNode(id);
+		let driver: ZWave = ZWaveDriver.getDriver();
+		let properties: NetworkNodeProperties = {
+			is_beaming: driver.isNodeBeamingDevice(id),
+			is_listening: driver.isNodeListeningDevice(id),
+			is_routing: driver.isNodeRoutingDevice(id)
+		}
+		node.properties = properties;
+	}
 
 	getNodes(): NetworkNode[] {
 		return this._store.getNodes();
