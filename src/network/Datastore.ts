@@ -9,7 +9,7 @@
 
 import { NetworkNode, NetworkNodeType, NetworkNodeInfo, NetworkNodeCaps, NetworkNodeProperties, NetworkNodeState } from './Node';
 import { NetworkValue } from './Value';
-import { NodeInfo, Value } from 'openzwave-shared';
+import { NodeInfo, Value, ValueGenre } from 'openzwave-shared';
 import { Logger } from 'tslog';
 
 
@@ -28,9 +28,11 @@ export class UnknownNodeError extends Error {
 
 export class Datastore {
 
+	// map of node_id -> node
 	private _nodes_by_id: {[id: number]: NetworkNode} = {};
+	// map of value_id -> value
 	private _values_by_id: {[id: string]: NetworkValue} = {};
-	// this is a map of nodeid -> map<valueid, value>
+	// this is a map of node_id -> map<value_id, value>
 	private _values_by_node: {[id: number]: {[id: string]: NetworkValue}} = {};
 
 
@@ -59,7 +61,6 @@ export class Datastore {
 		if (!this.nodeExists(id)) {
 			this._nodes_by_id[id] = node;
 		}
-		// this.updateNodeLastSeen(node);
 		return node;
 	}
 
@@ -107,17 +108,22 @@ export class Datastore {
 
 	// values
 	//
-	valueAdd(nodeid: number, cls: number, value: Value): NetworkValue {
-		let v: NetworkValue = {
+
+	private _createNetworkValue(nodeid: number, value: Value): NetworkValue {
+		return {
 			id: {
 				node_id: nodeid,
-				class_id: cls,
+				class_id: value.class_id,
 				instance: value.instance,
 				index: value.index
 			},
 			value: value,
-			last_seen: new Date()			
+			last_seen: new Date()
 		};
+	}
+
+	valueAdd(nodeid: number, cls: number, value: Value): NetworkValue {
+		let v: NetworkValue = this._createNetworkValue(nodeid, value);
 		if (!this.nodeExists(nodeid)) {
 			// the value exists, so the node must exist.
 			this.nodeAdd(nodeid);
@@ -131,7 +137,16 @@ export class Datastore {
 		return v;
 	}
 
-	valueChange() { }
+	valueChange(nodeid: number, cls: number, value: Value): void {
+		let valueid = value.value_id;
+		if (!(valueid in this._values_by_id)) {
+			// we must have missed the add event?
+			this.valueAdd(nodeid, cls, value);
+			return;
+		}
+		let v: NetworkValue = this._values_by_id[valueid];
+		v.value = value;
+	}
 
 	valuesRemoveByNode(id: number): void {
 		if (!(id in this._values_by_node)) {
@@ -158,6 +173,28 @@ export class Datastore {
 
 	valueExists(value_id: string): boolean {
 		return (value_id in this._values_by_id);
+	}
+
+	getValues(nodeid: number): NetworkValue[] {
+		if (!(nodeid in this._values_by_node)) {
+			return [];
+		}
+		return Object.values(this._values_by_node[nodeid]);
+	}
+
+	getValuesByGenre(nodeid: number, genre: ValueGenre): NetworkValue[] {
+		if (!(nodeid in this._values_by_node)) {
+			return [];
+		}
+		let values: NetworkValue[] =
+			Object.values(this._values_by_node[nodeid]);
+		let value_by_genre: NetworkValue[] = [];
+		values.forEach( (v) => {
+			if (v.value.genre === genre) {
+				value_by_genre.push(v);
+			}
+		});
+		return value_by_genre;
 	}
 
 

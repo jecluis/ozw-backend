@@ -24,6 +24,34 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NetworkStatusEnum": {
+        "dataType": "refEnum",
+        "enums": [0, 1, 2, 3, 4, 5, 6],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NetworkStatus": {
+        "dataType": "refObject",
+        "properties": {
+            "state": { "ref": "NetworkStatusEnum", "required": true },
+            "str": { "dataType": "string", "required": true },
+            "nodes_total": { "dataType": "double", "required": true },
+            "nodes_alive": { "dataType": "double", "required": true },
+            "nodes_asleep": { "dataType": "double", "required": true },
+            "nodes_awake": { "dataType": "double", "required": true },
+            "nodes_dead": { "dataType": "double", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NetworkStatusItem": {
+        "dataType": "refObject",
+        "properties": {
+            "driver": { "ref": "OZWDriverStatus", "required": true },
+            "network": { "ref": "NetworkStatus", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "SimpleReply": {
         "dataType": "refObject",
         "properties": {
@@ -76,9 +104,18 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "NetworkNodeState": {
+    "NetworkNodeStateEnum": {
         "dataType": "refEnum",
         "enums": [0, 1, 2, 3, 4, 5, 6],
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NetworkNodeState": {
+        "dataType": "refObject",
+        "properties": {
+            "state": { "ref": "NetworkNodeStateEnum", "required": true },
+            "str": { "dataType": "string", "required": true },
+        },
+        "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
     "NetworkNode": {
@@ -91,6 +128,61 @@ const models: TsoaRoute.Models = {
             "properties": { "ref": "NetworkNodeProperties", "required": true },
             "type": { "ref": "NetworkNodeType", "required": true },
             "state": { "ref": "NetworkNodeState", "required": true },
+            "last_seen": { "dataType": "datetime", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NetworkValueId": {
+        "dataType": "refObject",
+        "properties": {
+            "node_id": { "dataType": "double", "required": true },
+            "class_id": { "dataType": "double", "required": true },
+            "instance": { "dataType": "double", "required": true },
+            "index": { "dataType": "double", "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ValueType": {
+        "dataType": "refAlias",
+        "type": { "dataType": "union", "subSchemas": [{ "dataType": "enum", "enums": ["bool"] }, { "dataType": "enum", "enums": ["byte"] }, { "dataType": "enum", "enums": ["decimal"] }, { "dataType": "enum", "enums": ["int"] }, { "dataType": "enum", "enums": ["list"] }, { "dataType": "enum", "enums": ["schedule"] }, { "dataType": "enum", "enums": ["short"] }, { "dataType": "enum", "enums": ["string"] }, { "dataType": "enum", "enums": ["button"] }, { "dataType": "enum", "enums": ["raw"] }, { "dataType": "enum", "enums": ["max"] }, { "dataType": "enum", "enums": ["bitset"] }], "validators": {} },
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ValueGenre": {
+        "dataType": "refAlias",
+        "type": { "dataType": "union", "subSchemas": [{ "dataType": "enum", "enums": ["basic"] }, { "dataType": "enum", "enums": ["user"] }, { "dataType": "enum", "enums": ["system"] }, { "dataType": "enum", "enums": ["config"] }, { "dataType": "enum", "enums": ["count"] }], "validators": {} },
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "Value": {
+        "dataType": "refObject",
+        "properties": {
+            "value_id": { "dataType": "string", "required": true },
+            "node_id": { "dataType": "double", "required": true },
+            "class_id": { "dataType": "double", "required": true },
+            "type": { "ref": "ValueType", "required": true },
+            "genre": { "ref": "ValueGenre", "required": true },
+            "instance": { "dataType": "double", "required": true },
+            "index": { "dataType": "double", "required": true },
+            "label": { "dataType": "string", "required": true },
+            "units": { "dataType": "string", "required": true },
+            "help": { "dataType": "string", "required": true },
+            "read_only": { "dataType": "boolean", "required": true },
+            "write_only": { "dataType": "boolean", "required": true },
+            "min": { "dataType": "double", "required": true },
+            "max": { "dataType": "double", "required": true },
+            "is_polled": { "dataType": "boolean", "required": true },
+            "values": { "dataType": "array", "array": { "dataType": "string" } },
+            "value": { "dataType": "union", "subSchemas": [{ "dataType": "boolean" }, { "dataType": "double" }, { "dataType": "string" }], "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "NetworkValue": {
+        "dataType": "refObject",
+        "properties": {
+            "id": { "ref": "NetworkValueId", "required": true },
+            "value": { "ref": "Value", "required": true },
             "last_seen": { "dataType": "datetime", "required": true },
         },
         "additionalProperties": false,
@@ -229,6 +321,74 @@ export function RegisterRoutes(app: express.Express) {
 
 
             const promise = controller.getNodes.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, next);
+        });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/nodes/:id',
+        function(request: any, response: any, next: any) {
+            const args = {
+                id: { "in": "path", "name": "id", "required": true, "dataType": "double" },
+                notFoundResponse: { "in": "res", "name": "404", "required": true, "dataType": "nestedObjectLiteral", "nestedProperties": { "reason": { "dataType": "string", "required": true } } },
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new NodesController();
+
+
+            const promise = controller.getNode.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, next);
+        });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/nodes/:id/values',
+        function(request: any, response: any, next: any) {
+            const args = {
+                id: { "in": "path", "name": "id", "required": true, "dataType": "double" },
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new NodesController();
+
+
+            const promise = controller.getValues.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, next);
+        });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.get('/api/nodes/:id/values/genre/:genre',
+        function(request: any, response: any, next: any) {
+            const args = {
+                id: { "in": "path", "name": "id", "required": true, "dataType": "double" },
+                genre: { "in": "path", "name": "genre", "required": true, "dataType": "string" },
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new NodesController();
+
+
+            const promise = controller.getValuesByGenre.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, next);
         });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

@@ -38,6 +38,75 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"NetworkStatusEnum": {
+				"enum": [
+					0,
+					1,
+					2,
+					3,
+					4,
+					5,
+					6
+				],
+				"type": "number"
+			},
+			"NetworkStatus": {
+				"properties": {
+					"state": {
+						"$ref": "#/components/schemas/NetworkStatusEnum"
+					},
+					"str": {
+						"type": "string"
+					},
+					"nodes_total": {
+						"type": "number",
+						"format": "double"
+					},
+					"nodes_alive": {
+						"type": "number",
+						"format": "double"
+					},
+					"nodes_asleep": {
+						"type": "number",
+						"format": "double"
+					},
+					"nodes_awake": {
+						"type": "number",
+						"format": "double"
+					},
+					"nodes_dead": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"state",
+					"str",
+					"nodes_total",
+					"nodes_alive",
+					"nodes_asleep",
+					"nodes_awake",
+					"nodes_dead"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NetworkStatusItem": {
+				"properties": {
+					"driver": {
+						"$ref": "#/components/schemas/OZWDriverStatus"
+					},
+					"network": {
+						"$ref": "#/components/schemas/NetworkStatus"
+					}
+				},
+				"required": [
+					"driver",
+					"network"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"SimpleReply": {
 				"properties": {
 					"rc": {
@@ -147,7 +216,7 @@
 				"type": "object",
 				"additionalProperties": false
 			},
-			"NetworkNodeState": {
+			"NetworkNodeStateEnum": {
 				"enum": [
 					0,
 					1,
@@ -158,6 +227,22 @@
 					6
 				],
 				"type": "number"
+			},
+			"NetworkNodeState": {
+				"properties": {
+					"state": {
+						"$ref": "#/components/schemas/NetworkNodeStateEnum"
+					},
+					"str": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"state",
+					"str"
+				],
+				"type": "object",
+				"additionalProperties": false
 			},
 			"NetworkNode": {
 				"properties": {
@@ -200,6 +285,277 @@
 				],
 				"type": "object",
 				"additionalProperties": false
+			},
+			"NetworkValueId": {
+				"properties": {
+					"node_id": {
+						"type": "number",
+						"format": "double"
+					},
+					"class_id": {
+						"type": "number",
+						"format": "double"
+					},
+					"instance": {
+						"type": "number",
+						"format": "double"
+					},
+					"index": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"node_id",
+					"class_id",
+					"instance",
+					"index"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"ValueType": {
+				"anyOf": [
+					{
+						"type": "string",
+						"enum": [
+							"bool"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"byte"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"decimal"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"int"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"list"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"schedule"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"short"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"string"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"button"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"raw"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"max"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"bitset"
+						],
+						"nullable": false
+					}
+				]
+			},
+			"ValueGenre": {
+				"anyOf": [
+					{
+						"type": "string",
+						"enum": [
+							"basic"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"user"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"system"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"config"
+						],
+						"nullable": false
+					},
+					{
+						"type": "string",
+						"enum": [
+							"count"
+						],
+						"nullable": false
+					}
+				]
+			},
+			"Value": {
+				"properties": {
+					"value_id": {
+						"type": "string"
+					},
+					"node_id": {
+						"type": "number",
+						"format": "double"
+					},
+					"class_id": {
+						"type": "number",
+						"format": "double"
+					},
+					"type": {
+						"$ref": "#/components/schemas/ValueType"
+					},
+					"genre": {
+						"$ref": "#/components/schemas/ValueGenre"
+					},
+					"instance": {
+						"type": "number",
+						"format": "double"
+					},
+					"index": {
+						"type": "number",
+						"format": "double"
+					},
+					"label": {
+						"type": "string"
+					},
+					"units": {
+						"type": "string"
+					},
+					"help": {
+						"type": "string"
+					},
+					"read_only": {
+						"type": "boolean"
+					},
+					"write_only": {
+						"type": "boolean"
+					},
+					"min": {
+						"type": "number",
+						"format": "double"
+					},
+					"max": {
+						"type": "number",
+						"format": "double"
+					},
+					"is_polled": {
+						"type": "boolean"
+					},
+					"values": {
+						"items": {
+							"type": "string"
+						},
+						"type": "array"
+					},
+					"value": {
+						"anyOf": [
+							{
+								"type": "boolean"
+							},
+							{
+								"type": "number",
+								"format": "double"
+							},
+							{
+								"type": "string"
+							}
+						]
+					}
+				},
+				"required": [
+					"value_id",
+					"node_id",
+					"class_id",
+					"type",
+					"genre",
+					"instance",
+					"index",
+					"label",
+					"units",
+					"help",
+					"read_only",
+					"write_only",
+					"min",
+					"max",
+					"is_polled",
+					"value"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"NetworkValue": {
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/NetworkValueId"
+					},
+					"value": {
+						"$ref": "#/components/schemas/Value"
+					},
+					"last_seen": {
+						"type": "string",
+						"format": "date-time"
+					}
+				},
+				"required": [
+					"id",
+					"value",
+					"last_seen"
+				],
+				"type": "object",
+				"additionalProperties": false
 			}
 		},
 		"securitySchemes": {}
@@ -226,7 +582,7 @@
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/OZWDriverStatus"
+									"$ref": "#/components/schemas/NetworkStatusItem"
 								}
 							}
 						}
@@ -335,6 +691,125 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/api/nodes/{id}": {
+			"get": {
+				"operationId": "GetNode",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NetworkNode"
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "",
+						"content": {
+							"application/json": {
+								"schema": {
+									"properties": {
+										"reason": {
+											"type": "string"
+										}
+									},
+									"required": [
+										"reason"
+									],
+									"type": "object"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/api/nodes/{id}/values": {
+			"get": {
+				"operationId": "GetValues",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/NetworkValue"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				]
+			}
+		},
+		"/api/nodes/{id}/values/genre/{genre}": {
+			"get": {
+				"operationId": "GetValuesByGenre",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"$ref": "#/components/schemas/NetworkValue"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "genre",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
 			}
 		}
 	},

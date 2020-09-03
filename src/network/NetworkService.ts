@@ -9,7 +9,7 @@
 
 import { ZWaveDriver } from '../driver/ZWaveDriver';
 import ZWave, {
-	NodeInfo, Value, Notification
+	NodeInfo, Value, Notification, ValueGenre
 } from 'openzwave-shared';
 import { Datastore } from './Datastore';
 import { Logger } from 'tslog';
@@ -17,6 +17,7 @@ import {
 	NetworkNode, NetworkNodeCaps, NetworkNodeProperties,
 	NetworkNodeStateEnum, NetworkNodeType
 } from './Node';
+import { NetworkValue } from './Value';
 
 
 let logger: Logger = new Logger({name: 'network-service'});
@@ -276,6 +277,19 @@ export class NetworkService {
 
 	getNodes(): NetworkNode[] {
 		return this._store.getNodes();
+	}
+
+	getNode(id: number): NetworkNode {
+		// this can throw.
+		return this._store.getNode(id);
+	}
+
+	getValues(id: number): NetworkValue[] {
+		return this._store.getValues(id);
+	}
+
+	getValuesByGenre(id: number, genre: ValueGenre): NetworkValue[] {
+		return this._store.getValuesByGenre(id, genre);
 	}
 
 	getStatus(): NetworkStatus {

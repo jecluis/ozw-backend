@@ -7,8 +7,6 @@
  * European Comission.
  */
 
-import { NodeInfo, Notification } from 'openzwave-shared';
-
 export enum NetworkNodeStateEnum {
 	MessageComplete = 0,
 	Timeout = 1,
