@@ -6,6 +6,85 @@
 		"requestBodies": {},
 		"responses": {},
 		"schemas": {
+			"CommandEnum": {
+				"enum": [
+					0,
+					1,
+					2,
+					3,
+					4,
+					5,
+					6,
+					7,
+					8,
+					9,
+					10,
+					11,
+					12,
+					13,
+					14,
+					15,
+					16,
+					17,
+					18
+				],
+				"type": "number"
+			},
+			"CommandState": {
+				"properties": {
+					"command": {
+						"$ref": "#/components/schemas/CommandEnum"
+					},
+					"is_completed": {
+						"type": "boolean"
+					},
+					"is_failed": {
+						"type": "boolean"
+					},
+					"is_cancelled": {
+						"type": "boolean"
+					},
+					"is_running": {
+						"type": "boolean"
+					},
+					"is_waiting": {
+						"type": "boolean"
+					},
+					"percent_done": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"required": [
+					"command",
+					"is_completed",
+					"is_failed",
+					"is_cancelled",
+					"is_running",
+					"is_waiting",
+					"percent_done"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"CommandStatus": {
+				"properties": {
+					"is_running_command": {
+						"type": "boolean"
+					},
+					"current_command": {
+						"$ref": "#/components/schemas/CommandState"
+					},
+					"last_command": {
+						"$ref": "#/components/schemas/CommandState"
+					}
+				},
+				"required": [
+					"is_running_command"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"OZWDriverStatus": {
 				"properties": {
 					"is_connected": {
@@ -573,6 +652,82 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
+		"/api/command/node/add": {
+			"put": {
+				"operationId": "NodeAdd",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/command/network/heal": {
+			"put": {
+				"operationId": "HealNetwork",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/command/cancel": {
+			"put": {
+				"operationId": "CancelCommand",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
+		"/api/command/status": {
+			"get": {
+				"operationId": "GetCommandStatus",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/CommandStatus"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/api/network/status": {
 			"get": {
 				"operationId": "GetNetworkStatus",
