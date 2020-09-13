@@ -61,8 +61,16 @@ export interface CommandState {
 	is_running: boolean;
 	is_waiting: boolean;
 	percent_done: number;
+
+	time_started: Date;
+	time_finished?: Date;
 }
 
+export interface CommandStatus {
+	is_running_command: boolean;
+	current_command?: CommandState;
+	last_command?: CommandState;
+}
 
 abstract class Command {
 
@@ -74,7 +82,9 @@ abstract class Command {
 			is_cancelled: false,
 			is_running: false,
 			is_waiting: false,
-			percent_done: 0
+			percent_done: 0,
+			time_started: new Date(),
+			time_finished: undefined
 		};
 	}
 
@@ -115,7 +125,11 @@ abstract class Command {
 	};
 
 	public isDone(): boolean {
-		return this._is_cancelled || this._isDone();
+		let is_done: boolean = (this._is_cancelled || this._isDone());
+		if (is_done && !this._state.time_finished) {
+			this._state.time_finished = new Date();
+		}
+		return is_done;
 	}
 
 	public cancel(): void {
@@ -202,12 +216,6 @@ class CommandHealNetwork extends Command {
 	}
 }
 
-// XXX: please rework this.
-export interface CommandStatus {
-	is_running_command: boolean;
-	current_command?: CommandState;
-	last_command?: CommandState;
-}
 
 let logger: Logger = new Logger({name: "command-service"});
 
@@ -282,18 +290,6 @@ export class CommandService {
 		if (this._command_handler.isDone()) {
 			this._archiveRunningCommand();
 		}
-	}
-
-	private _createNewCommandStatus(): CommandState {
-		return {
-			command: CommandEnum.None,
-			is_completed: false,
-			is_cancelled: false,
-			is_failed: false,
-			is_running: false,
-			is_waiting: false,
-			percent_done: 0
-		};
 	}
 
 	private _archiveRunningCommand(): void {
