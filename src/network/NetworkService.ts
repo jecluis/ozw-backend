@@ -18,6 +18,7 @@ import {
 	NetworkNodeStateEnum, NetworkNodeType
 } from './Node';
 import { NetworkValue } from './Value';
+import { PrometheusDriver } from '../driver/PrometheusDriver';
 
 
 let logger: Logger = new Logger({name: 'network-service'});
@@ -231,6 +232,10 @@ export class NetworkService {
 				node_type.is_meter = true;
 				break;
 		}
+
+		if (node_type.is_meter) {
+			this._addToPrometheus(id, cls, value);
+		}
 	}
 
 	private _onValueChanged(id: number, cls: number, value: Value) {
@@ -369,5 +374,15 @@ export class NetworkService {
 			state: state,
 			str: state_str
 		};
+	}
+
+
+	private _addToPrometheus(id: number, cls: number, value: Value) {
+		let unit: string = value.units;
+		if (unit !== "A" && unit !== "V" && unit !== "W") {
+			return;
+		}
+		let v: number = +value.value;
+		PrometheusDriver.put(id, unit, v);
 	}
  }

@@ -10,7 +10,7 @@
 import { RegisterRoutes } from '../tsoa/routes';
 import swaggerUi from 'swagger-ui-express';
 import express, {
-	Response as ExResponse, Request as ExRequest
+	Response as ExResponse, Request as ExRequest, RequestHandler
 } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -18,6 +18,7 @@ import fs from 'fs';
 import { Logger } from 'tslog';
 import { Server } from 'http';
 import { ConfigService, BackendConfig } from './ConfigService';
+import express_prom_bundle, * as promBundle from 'express-prom-bundle';
 
 
 let logger: Logger = new Logger({name: 'http-driver'});
@@ -38,6 +39,9 @@ export class HTTPDriver {
 					swaggerUi.generateHTML(JSON.parse(swaggerstr.toString()))
 				);
 		});
+		let prom_middleware: RequestHandler =
+			express_prom_bundle({includeMethod: true});
+		this.httpApp.use(prom_middleware);
 		RegisterRoutes(this.httpApp);
 	}
 
