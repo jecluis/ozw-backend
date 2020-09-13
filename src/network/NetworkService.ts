@@ -235,10 +235,12 @@ export class NetworkService {
 
 	private _onValueChanged(id: number, cls: number, value: Value) {
 		if (!this._isRunning()) { return; }
+		this._store.valueChange(id, cls, value);
 	}
 
 	private _onValueRefreshed(id: number, cls: number, value: Value) {
 		if (!this._isRunning()) { return; }
+		this._onValueChanged(id, cls, value);
 	}
 
 	private _onValueRemoved(

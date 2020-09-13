@@ -134,6 +134,8 @@ export class Datastore {
 		let value_id: string = value.value_id;
 		this._values_by_node[nodeid][value_id] = v;
 		this._values_by_id[value_id] = v;
+		this.updateNodeLastSeenByID(nodeid);
+		this.updateValueLastSeen(v);
 		return v;
 	}
 
@@ -146,6 +148,8 @@ export class Datastore {
 		}
 		let v: NetworkValue = this._values_by_id[valueid];
 		v.value = value;
+		this.updateNodeLastSeenByID(nodeid);
+		this.updateValueLastSeen(v);
 	}
 
 	valuesRemoveByNode(id: number): void {
@@ -169,6 +173,7 @@ export class Datastore {
 	valueRemove(id: number, cls: number, inst: number, idx: number): void {
 		let value_id = `${id}-${cls}-${inst}-${idx}`;
 		this.valueRemoveByID(value_id);
+		this.updateNodeLastSeenByID(id);
 	}
 
 	valueExists(value_id: string): boolean {
@@ -200,6 +205,11 @@ export class Datastore {
 
 	updateNodeLastSeen(node: NetworkNode) {
 		node.last_seen = new Date();
+	}
+
+	updateNodeLastSeenByID(nodeid: number) {
+		let node = this.getNode(nodeid);
+		this.updateNodeLastSeen(node);
 	}
 
 	updateValueLastSeen(value: NetworkValue) {
