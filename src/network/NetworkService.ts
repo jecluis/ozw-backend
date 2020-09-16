@@ -304,11 +304,16 @@ export class NetworkService {
 	}
 
 	setValueByID(value: ValueSetRequest) {
-		console.debug(`set value by id: `, value);
+		logger.debug(`set value by id: `, value);
 		let driver: ZWave = ZWaveDriver.getDriver();
+		driver.setChangeVerified(
+			value.node_id, value.class_id, value.instance,
+			value.index, true);
+		logger.debug(`set-value-by-id: setting `, value);
 		driver.setValue(
 			value.node_id, value.class_id, value.instance,
 			value.index, value.value);
+		logger.debug(`set-value-by-id: sent to driver `, value);
 	}
 
 	getStatus(): NetworkStatus {
