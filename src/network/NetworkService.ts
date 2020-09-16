@@ -216,6 +216,17 @@ export class NetworkService {
 		this._updateStatus();
 	}
 
+	private _isClassMeter(cls: number): boolean {
+		// 0x32: COMMAND_CLASS_METER
+		return (cls == 0x32);
+	}
+
+	private _isClassSwitch(cls: number): boolean {
+		// 0x25: COMMAND_CLASS_SWITCH_BINARY
+		// 0x26: COMMAND_CLASS_SWITH_MULTILEVEL
+		return (cls == 0x25 || cls == 0x26);
+	}
+
 	// values
 	private _onValueAdded(id: number, cls: number, value: Value) {
 		if (!this._isRunning()) { return; }
@@ -223,14 +234,10 @@ export class NetworkService {
 
 		let node: NetworkNode = this._store.getNode(id);
 		let node_type: NetworkNodeType = node.type;
-		switch (cls) {
-			case 0x25: // COMMAND_CLASS_SWITCH_BINARY
-			case 0x26: // COMMAND_CLASS_SWITH_MULTILEVEL
-				node_type.is_switch = true;
-				break;
-			case 0x32: // COMMAND_CLASS_METER
-				node_type.is_meter = true;
-				break;
+		if (this._isClassMeter(cls)) {
+			node_type.is_meter = true;
+		} else if (this._isClassSwitch(cls)) {
+			node_type.is_switch = true;
 		}
 
 		if (node_type.is_meter) {
@@ -241,11 +248,16 @@ export class NetworkService {
 	private _onValueChanged(id: number, cls: number, value: Value) {
 		if (!this._isRunning()) { return; }
 		this._store.valueChange(id, cls, value);
+		logger.info(`value changed on node ${id}: ${value.value_id}`);
+		if (this._isClassMeter(cls)) {
+			this._addToPrometheus(id, cls, value);
+		}
 	}
 
 	private _onValueRefreshed(id: number, cls: number, value: Value) {
 		if (!this._isRunning()) { return; }
 		this._onValueChanged(id, cls, value);
+		logger.info(`value refreshed on node ${id}: ${value.value_id}`);
 	}
 
 	private _onValueRemoved(
