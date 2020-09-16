@@ -14,13 +14,14 @@ import {
 	Post,
 	Path,
 	Res,
-	TsoaResponse
+	TsoaResponse,
+	Body
 } from 'tsoa';
 import { Logger } from 'tslog';
 import { NetworkService } from '../network/NetworkService';
 import { NetworkNode } from '../network/Node';
+import { NetworkValue, ValueSetRequest } from '../network/Value';
 import { ValueGenre } from 'openzwave-shared';
-import { NetworkValue } from 'src/network/Value';
 
 
 let logger: Logger = new Logger({name: "api-nodes"});
@@ -76,6 +77,17 @@ export class NodesController extends Controller {
 		@Path() valueid: string
 	): Promise<NetworkValue> {
 		return svc.getValueByID(id, valueid);
+	}
+
+	@Post("/{id}/values/id/{valueid}")
+	public async setValueByID(
+		@Path() id: number,
+		@Path() valueid: string,
+		@Body() value: ValueSetRequest
+	): Promise<boolean> {
+		logger.debug(`set node ${id} value ${valueid} to `, value);
+		svc.setValueByID(value);
+		return true;
 	}
 
 	@Get("{id}/neighbors")

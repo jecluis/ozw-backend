@@ -57,3 +57,13 @@ export interface NetworkValue {
 	value: Value;
 	last_seen: Date;
 }
+
+export interface ValueSetRequest<T = boolean | number | string> {
+	value_id: string;
+	node_id: number;
+	class_id: number;
+	instance: number;
+	index: number;
+	value_type: string;
+	value: T;
+}

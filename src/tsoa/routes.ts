@@ -221,6 +221,20 @@ const models: TsoaRoute.Models = {
         "additionalProperties": false,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    "ValueSetRequest": {
+        "dataType": "refObject",
+        "properties": {
+            "value_id": { "dataType": "string", "required": true },
+            "node_id": { "dataType": "double", "required": true },
+            "class_id": { "dataType": "double", "required": true },
+            "instance": { "dataType": "double", "required": true },
+            "index": { "dataType": "double", "required": true },
+            "value_type": { "dataType": "string", "required": true },
+            "value": { "dataType": "union", "subSchemas": [{ "dataType": "boolean" }, { "dataType": "double" }, { "dataType": "string" }], "required": true },
+        },
+        "additionalProperties": false,
+    },
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 };
 const validationService = new ValidationService(models);
 
@@ -529,6 +543,30 @@ export function RegisterRoutes(app: express.Express) {
 
 
             const promise = controller.getValueByID.apply(controller, validatedArgs as any);
+            promiseHandler(controller, promise, response, next);
+        });
+    // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+    app.post('/api/nodes/:id/values/id/:valueid',
+        function(request: any, response: any, next: any) {
+            const args = {
+                id: { "in": "path", "name": "id", "required": true, "dataType": "double" },
+                valueid: { "in": "path", "name": "valueid", "required": true, "dataType": "string" },
+                value: { "in": "body", "name": "value", "required": true, "ref": "ValueSetRequest" },
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = getValidatedArgs(args, request, response);
+            } catch (err) {
+                return next(err);
+            }
+
+            const controller = new NodesController();
+
+
+            const promise = controller.setValueByID.apply(controller, validatedArgs as any);
             promiseHandler(controller, promise, response, next);
         });
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa

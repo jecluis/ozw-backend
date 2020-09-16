@@ -17,7 +17,7 @@ import {
 	NetworkNode, NetworkNodeCaps, NetworkNodeProperties,
 	NetworkNodeStateEnum, NetworkNodeType
 } from './Node';
-import { NetworkValue } from './Value';
+import { NetworkValue, ValueSetRequest } from './Value';
 import { PrometheusDriver } from '../driver/PrometheusDriver';
 
 
@@ -301,6 +301,14 @@ export class NetworkService {
 
 	getValueByID(id: number, valueid: string): NetworkValue {
 		return this._store.getValueByID(id, valueid);
+	}
+
+	setValueByID(value: ValueSetRequest) {
+		console.debug(`set value by id: `, value);
+		let driver: ZWave = ZWaveDriver.getDriver();
+		driver.setValue(
+			value.node_id, value.class_id, value.instance,
+			value.index, value.value);
 	}
 
 	getStatus(): NetworkStatus {
