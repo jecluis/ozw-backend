@@ -202,6 +202,16 @@ export class Datastore {
 		return value_by_genre;
 	}
 
+	public getValueByID(nodeid: number, valueid: string): NetworkValue {
+		if (!(nodeid in this._values_by_node)) {
+			return {} as NetworkValue;
+		}
+		if (!(valueid in this._values_by_id)) {
+			return {} as NetworkValue;
+		}
+		return this._values_by_id[valueid];
+	}
+
 
 	updateNodeLastSeen(node: NetworkNode) {
 		node.last_seen = new Date();

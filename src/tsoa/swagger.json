@@ -53,6 +53,14 @@
 					"percent_done": {
 						"type": "number",
 						"format": "double"
+					},
+					"time_started": {
+						"type": "string",
+						"format": "date-time"
+					},
+					"time_finished": {
+						"type": "string",
+						"format": "date-time"
 					}
 				},
 				"required": [
@@ -62,7 +70,8 @@
 					"is_cancelled",
 					"is_running",
 					"is_waiting",
-					"percent_done"
+					"percent_done",
+					"time_started"
 				],
 				"type": "object",
 				"additionalProperties": false
@@ -962,6 +971,76 @@
 						"required": true,
 						"schema": {
 							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/nodes/{id}/values/id/{valueid}": {
+			"get": {
+				"operationId": "GetValueByID",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/NetworkValue"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "valueid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				]
+			}
+		},
+		"/api/nodes/{id}/neighbors": {
+			"get": {
+				"operationId": "GetNodeNeighbors",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"items": {
+										"type": "number",
+										"format": "double"
+									},
+									"type": "array"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
 						}
 					}
 				]

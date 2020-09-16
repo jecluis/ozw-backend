@@ -299,9 +299,21 @@ export class NetworkService {
 		return this._store.getValuesByGenre(id, genre);
 	}
 
+	getValueByID(id: number, valueid: string): NetworkValue {
+		return this._store.getValueByID(id, valueid);
+	}
+
 	getStatus(): NetworkStatus {
 		this._updateStatus();
 		return this._status;	
+	}
+
+	public getNodeNeighbors(id: number): number[] {
+		if (!this._store.nodeExists(id)) {
+			return [];
+		}
+		let driver: ZWave = ZWaveDriver.getDriver();
+		return driver.getNodeNeighbors(id);
 	}
 
 

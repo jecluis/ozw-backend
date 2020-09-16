@@ -69,4 +69,19 @@ export class NodesController extends Controller {
 		}
 		return [];
 	}
+
+	@Get("/{id}/values/id/{valueid}")
+	public async getValueByID(
+		@Path() id: number,
+		@Path() valueid: string
+	): Promise<NetworkValue> {
+		return svc.getValueByID(id, valueid);
+	}
+
+	@Get("{id}/neighbors")
+	public async getNodeNeighbors(
+		@Path() id: number
+	): Promise<number[]> {
+		return svc.getNodeNeighbors(id);
+	}
 }
