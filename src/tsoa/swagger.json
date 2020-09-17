@@ -374,6 +374,18 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"APISetNodeNameRequest": {
+				"properties": {
+					"name": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"name"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"NetworkValueId": {
 				"properties": {
 					"node_id": {
@@ -953,6 +965,45 @@
 						}
 					}
 				]
+			}
+		},
+		"/api/nodes/{id}/name": {
+			"post": {
+				"operationId": "SetNodeName",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/APISetNodeNameRequest"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/nodes/{id}/values": {

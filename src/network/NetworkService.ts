@@ -328,6 +328,16 @@ export class NetworkService {
 		logger.debug(`set-value-by-id: sent to driver `, value);
 	}
 
+	public setNodeName(nodeid: number, name: string): void {
+		if (!name || name === "") {
+			logger.info(`refusing to set node ${nodeid} name to empty`);
+			return;
+		}
+		logger.debug(`set node ${nodeid} name to ${name}`);
+		let driver: ZWave = ZWaveDriver.getDriver();
+		driver.setNodeName(nodeid, name);
+	}
+
 	getStatus(): NetworkStatus {
 		this._updateStatus();
 		return this._status;	

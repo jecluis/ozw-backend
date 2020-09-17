@@ -19,7 +19,7 @@ import {
 } from 'tsoa';
 import { Logger } from 'tslog';
 import { NetworkService } from '../network/NetworkService';
-import { NetworkNode } from '../network/Node';
+import { NetworkNode, APISetNodeNameRequest } from '../network/Node';
 import { NetworkValue, ValueSetRequest } from '../network/Value';
 import { ValueGenre } from 'openzwave-shared';
 
@@ -53,6 +53,19 @@ export class NodesController extends Controller {
 			notFoundResponse(404, { reason: `unknown node id ${id}`});			
 		}
 		return node;
+	}
+
+	@Post("/{id}/name")
+	public async setNodeName(
+		@Path() id: number,
+		@Body() name: APISetNodeNameRequest
+	): Promise<boolean> {
+		logger.debug(`set node ${id} name to ${name.name}`);
+		if (!name || name.name == "") {
+			return false;
+		}
+		svc.setNodeName(id, name.name);
+		return true;
 	}
 
 	@Get("/{id}/values")
