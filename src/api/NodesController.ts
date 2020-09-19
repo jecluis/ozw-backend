@@ -103,6 +103,28 @@ export class NodesController extends Controller {
 		return true;
 	}
 
+	@Post("{id}/values/button/{valueid}/press")
+	public async setButtonPressedByID(
+		@Path() id: number,
+		@Path() valueid: string,
+		@Body() value: ValueSetRequest
+	): Promise<boolean> {
+		logger.debug(`press button on node ${id} id ${valueid}`);
+		svc.setButtonPressed(value);
+		return true;
+	}
+
+	@Post("{id}/values/button/{valueid}/release")
+	public async setButtonReleasedByID(
+		@Path() id: number,
+		@Path() valueid: string,
+		@Body() value: ValueSetRequest
+	): Promise<boolean> {
+		logger.debug(`release button on node ${id} id ${valueid}`);
+		svc.setButtonReleased(value);
+		return true;
+	}
+
 	@Get("{id}/neighbors")
 	public async getNodeNeighbors(
 		@Path() id: number

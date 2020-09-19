@@ -1160,6 +1160,100 @@
 				}
 			}
 		},
+		"/api/nodes/{id}/values/button/{valueid}/press": {
+			"post": {
+				"operationId": "SetButtonPressedByID",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "valueid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ValueSetRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/nodes/{id}/values/button/{valueid}/release": {
+			"post": {
+				"operationId": "SetButtonReleasedByID",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "valueid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ValueSetRequest"
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/nodes/{id}/neighbors": {
 			"get": {
 				"operationId": "GetNodeNeighbors",
