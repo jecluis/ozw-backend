@@ -167,6 +167,33 @@ class CommandAddNode extends Command {
 	public getPercent(): number { return 0; }
 }
 
+
+class CommandRemoveNode extends Command {
+	constructor() { super(CommandEnum.RemoveDevice); }
+
+	public _isDone(): boolean {
+		return this.isNotAlive();
+	}
+
+	public handle(id: number, state: CommandStateEnum): void {
+		if (state == CommandStateEnum.STARTING) {
+			this.markIsRunning();
+		} else if (state == CommandStateEnum.WAITING) {
+			this.markIsWaiting();
+		} else if (state == CommandStateEnum.COMPLETED) {
+			this.markIsCompleted();
+		} else if (state == CommandStateEnum.FAILED ||
+		           state == CommandStateEnum.ERROR) {
+			this.markIsFailed();
+		} else if (state == CommandStateEnum.CANCEL) {
+			this.markIsCancelled();
+		}
+	}
+
+	public hasPercent(): boolean { return false; }
+	public getPercent(): number { return 0; }
+}
+
 class CommandHealNetwork extends Command {
 	constructor() {
 		super(CommandEnum.RequestNodeNeighborUpdate);
@@ -317,6 +344,23 @@ export class CommandService {
 		this._is_running_command = true;
 		this._command_handler = new CommandAddNode();
 		this._zwave.addNode();
+		return true;
+	}
+
+	removeNode() {
+		logger.info("command > remove node");
+		if (!this._driver.isReady()) {
+			logger.info("refusing command because driver is not ready");
+			return false;
+		}
+		if (this._is_running_command) {
+			logger.info("refusing command because command already running");
+			return false;
+		}
+
+		this._is_running_command = true;
+		this._command_handler = new CommandRemoveNode();
+		this._zwave.removeNode();
 		return true;
 	}
 

@@ -743,6 +743,25 @@
 				"parameters": []
 			}
 		},
+		"/api/command/node/remove": {
+			"put": {
+				"operationId": "NodeRemove",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/api/command/network/heal": {
 			"put": {
 				"operationId": "HealNetwork",

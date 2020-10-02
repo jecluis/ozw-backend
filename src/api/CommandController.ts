@@ -35,6 +35,12 @@ export class CommandController extends Controller {
 		return svc.addNode();
 	}
 
+	@Put("/node/remove")
+	public async nodeRemove(): Promise<boolean> {
+		logger.debug("remove node command");
+		return svc.removeNode();
+	}
+
 	@Put("/network/heal")
 	public async healNetwork(): Promise<boolean> {
 		logger.debug("heal node command");
