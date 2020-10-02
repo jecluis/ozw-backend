@@ -287,32 +287,6 @@ export class CommandService {
 			return;
 		}
 
-		/*
-		switch (state) {
-			case CommandStateEnum.CANCEL: 
-				this._current_command.is_cancelled = true;
-				this._current_command.is_running = false;
-				this._current_command.is_waiting = false;
-				break;
-			case CommandStateEnum.COMPLETED:
-				this._current_command.is_completed = true;
-				this._current_command.is_running = false;
-				this._current_command.is_waiting = false;
-				break;
-			case CommandStateEnum.WAITING:
-				this._current_command.is_waiting = true;
-				break;
-			case CommandStateEnum.STARTING:
-				this._current_command.is_running = true;
-				break;
-			case CommandStateEnum.FAILED:
-				this._current_command.is_failed = true;
-				this._current_command.is_running = false;
-				this._current_command.is_waiting = false;
-				break;
-		}
-		*/
-
 		this._command_handler.handle(id, state);
 		if (this._command_handler.isDone()) {
 			this._archiveRunningCommand();
