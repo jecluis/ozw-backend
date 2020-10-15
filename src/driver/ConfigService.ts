@@ -8,44 +8,48 @@
  */
 
 export interface BackendConfig {
-	http: {
-		host: string;
-		port: number;
-	};
-	zwave: ZWaveConfig;
+    http: {
+        host: string;
+        port: number;
+    };
+    zwave: ZWaveConfig;
 }
 
 export interface ZWaveConfig {
-	device: string;
+    device: string;
 }
 
 
 export class ConfigService {
 
-	private static instance: ConfigService;
-	private constructor() { }
-	public static getInstance(): ConfigService {
-		if (!ConfigService.instance) {
-			ConfigService.instance = new ConfigService();
-		}
-		return ConfigService.instance;
-	}
+    private static instance: ConfigService;
+    private _config: BackendConfig = {
+        http: {
+            host: "0.0.0.0",
+            port: 31337
+        },
+        zwave: {
+            device: ""
+        }
+    };
 
-	private _config: BackendConfig = {
-		http: {
-			host: "0.0.0.0",
-			port: 31337
-		},
-		zwave: {
-			device: ""
-		}
-	};
+    private constructor() { }
+    public static getInstance(): ConfigService {
+        if (!ConfigService.instance) {
+            ConfigService.instance = new ConfigService();
+        }
+        return ConfigService.instance;
+    }
 
-	public getConfig(): BackendConfig {
-		return this._config;
-	}
+    public static getConfig(): BackendConfig {
+        return ConfigService.getInstance().getConfig();
+    }
 
-	public static getConfig(): BackendConfig {
-		return ConfigService.getInstance().getConfig();
-	}
+    public getConfig(): BackendConfig {
+        return this._config;
+    }
+
+    public load(): void {
+
+    }
 }

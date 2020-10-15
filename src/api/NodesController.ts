@@ -8,14 +8,14 @@
  */
 
 import {
-	Controller,
-	Get,
-	Route,
-	Post,
-	Path,
-	Res,
-	TsoaResponse,
-	Body
+    Controller,
+    Get,
+    Route,
+    Post,
+    Path,
+    Res,
+    TsoaResponse,
+    Body
 } from 'tsoa';
 import { Logger } from 'tslog';
 import { NetworkService } from '../network/NetworkService';
@@ -24,111 +24,112 @@ import { NetworkValue, ValueSetRequest } from '../network/Value';
 import { ValueGenre } from 'openzwave-shared';
 
 
-let logger: Logger = new Logger({name: "api-nodes"});
-let svc: NetworkService = NetworkService.getInstance();
+const logger: Logger = new Logger({name: "api-nodes"});
+const svc: NetworkService = NetworkService.getInstance();
 
 
 @Route("/api/nodes")
 export class NodesController extends Controller {
 
-	constructor() { super(); }
+    constructor() { super(); }
 
-	@Get("")
-	public async getNodes(): Promise<NetworkNode[]> {
-		logger.debug("get network nodes");
-		return svc.getNodes();
-	}
+    @Get("")
+    public async getNodes(): Promise<NetworkNode[]> {
+        logger.debug("get network nodes");
+        return svc.getNodes();
+    }
 
-	@Get("/{id}")
-	public async getNode(
-		@Path() id: number,
-		@Res() notFoundResponse: TsoaResponse<404, {reason: string}>): Promise<NetworkNode> {
-		logger.debug(`get network node id ${id}`);
-		let node: NetworkNode = {} as NetworkNode;
-		try {
-			node = svc.getNode(id);
-			return node;
-		} catch (e) {
-			// no such node
-			notFoundResponse(404, { reason: `unknown node id ${id}`});			
-		}
-		return node;
-	}
+    @Get("/{id}")
+    public async getNode(
+        @Path() id: number,
+        @Res() notFoundResponse: TsoaResponse<404, {reason: string}>
+    ): Promise<NetworkNode> {
+        logger.debug(`get network node id ${id}`);
+        let node: NetworkNode = {} as NetworkNode;
+        try {
+            node = svc.getNode(id);
+            return node;
+        } catch (e) {
+            // no such node
+            notFoundResponse(404, { reason: `unknown node id ${id}`});
+        }
+        return node;
+    }
 
-	@Post("/{id}/name")
-	public async setNodeName(
-		@Path() id: number,
-		@Body() name: APISetNodeNameRequest
-	): Promise<boolean> {
-		logger.debug(`set node ${id} name to ${name.name}`);
-		if (!name || name.name == "") {
-			return false;
-		}
-		svc.setNodeName(id, name.name);
-		return true;
-	}
+    @Post("/{id}/name")
+    public async setNodeName(
+        @Path() id: number,
+        @Body() name: APISetNodeNameRequest
+    ): Promise<boolean> {
+        logger.debug(`set node ${id} name to ${name.name}`);
+        if (!name || name.name === "") {
+            return false;
+        }
+        svc.setNodeName(id, name.name);
+        return true;
+    }
 
-	@Get("/{id}/values")
-	public async getValues(@Path() id: number): Promise<NetworkValue[]> {
-		return svc.getValues(id);
-	}
+    @Get("/{id}/values")
+    public async getValues(@Path() id: number): Promise<NetworkValue[]> {
+        return svc.getValues(id);
+    }
 
-	@Get("/{id}/values/genre/{genre}")
-	public async getValuesByGenre(
-		@Path() id: number,
-		@Path() genre: string
-	): Promise<NetworkValue[]> {
-		if (genre as ValueGenre) {
-			return svc.getValuesByGenre(id, (genre as ValueGenre));
-		}
-		return [];
-	}
+    @Get("/{id}/values/genre/{genre}")
+    public async getValuesByGenre(
+        @Path() id: number,
+        @Path() genre: string
+    ): Promise<NetworkValue[]> {
+        if (genre as ValueGenre) {
+            return svc.getValuesByGenre(id, (genre as ValueGenre));
+        }
+        return [];
+    }
 
-	@Get("/{id}/values/id/{valueid}")
-	public async getValueByID(
-		@Path() id: number,
-		@Path() valueid: string
-	): Promise<NetworkValue> {
-		return svc.getValueByID(id, valueid);
-	}
+    @Get("/{id}/values/id/{valueid}")
+    public async getValueByID(
+        @Path() id: number,
+        @Path() valueid: string
+    ): Promise<NetworkValue> {
+        return svc.getValueByID(id, valueid);
+    }
 
-	@Post("/{id}/values/id/{valueid}")
-	public async setValueByID(
-		@Path() id: number,
-		@Path() valueid: string,
-		@Body() value: ValueSetRequest
-	): Promise<boolean> {
-		logger.debug(`set node ${id} value ${valueid} to `, value);
-		svc.setValueByID(value);
-		return true;
-	}
+    @Post("/{id}/values/id/{valueid}")
+    public async setValueByID(
+        @Path() id: number,
+        @Path() valueid: string,
+        @Body() value: ValueSetRequest
+    ): Promise<boolean> {
+        logger.debug(`set node ${id} value ${valueid} to `, value);
+        svc.setValueByID(value);
+        return true;
+    }
 
-	@Post("{id}/values/button/{valueid}/press")
-	public async setButtonPressedByID(
-		@Path() id: number,
-		@Path() valueid: string,
-		@Body() value: ValueSetRequest
-	): Promise<boolean> {
-		logger.debug(`press button on node ${id} id ${valueid}`);
-		svc.setButtonPressed(value);
-		return true;
-	}
+    @Post("{id}/values/button/{valueid}/press")
+    public async setButtonPressedByID(
+        @Path() id: number,
+        @Path() valueid: string,
+        @Body() value: ValueSetRequest
+    ): Promise<boolean> {
+        logger.debug(`press button on node ${id} id ${valueid}`);
+        svc.setButtonPressed(value);
+        return true;
+    }
 
-	@Post("{id}/values/button/{valueid}/release")
-	public async setButtonReleasedByID(
-		@Path() id: number,
-		@Path() valueid: string,
-		@Body() value: ValueSetRequest
-	): Promise<boolean> {
-		logger.debug(`release button on node ${id} id ${valueid}`);
-		svc.setButtonReleased(value);
-		return true;
-	}
+    @Post("{id}/values/button/{valueid}/release")
+    public async setButtonReleasedByID(
+        @Path() id: number,
+        @Path() valueid: string,
+        @Body() value: ValueSetRequest
+    ): Promise<boolean> {
+        logger.debug(`release button on node ${id} id ${valueid}`);
+        svc.setButtonReleased(value);
+        return true;
+    }
 
-	@Get("{id}/neighbors")
-	public async getNodeNeighbors(
-		@Path() id: number
-	): Promise<number[]> {
-		return svc.getNodeNeighbors(id);
-	}
+    @Get("{id}/neighbors")
+    public async getNodeNeighbors(
+        @Path() id: number
+    ): Promise<number[]> {
+        return svc.getNodeNeighbors(id);
+    }
 }

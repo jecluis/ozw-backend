@@ -8,6 +8,6 @@
  */
 
 export interface SimpleReply {
-	rc: number;
-	str: string;
+    rc: number;
+    str: string;
 }
