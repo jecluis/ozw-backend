@@ -8,50 +8,56 @@
  */
 
 import {
-	Controller,
-	Get,
-	Route,
-	Post,
-	Put
+    Controller,
+    Get,
+    Route,
+    Post,
+    Put
 } from 'tsoa';
 import { Logger } from 'tslog';
 import { ZWaveDriver } from '../driver/ZWaveDriver';
 import { CommandService, CommandStatus } from '../network/CommandService';
 
 
-let logger: Logger = new Logger({name: "api-network"});
-let driver: ZWaveDriver = ZWaveDriver.getInstance();
-let svc: CommandService = CommandService.getInstance();
+const logger: Logger = new Logger({name: "api-network"});
+const driver: ZWaveDriver = ZWaveDriver.getInstance();
+const svc: CommandService = CommandService.getInstance();
 
 
 @Route("/api/command")
 export class CommandController extends Controller {
 
-	constructor() { super(); }
+    constructor() { super(); }
 
-	@Put("/node/add")
-	public async nodeAdd(): Promise<boolean> {
-		logger.debug("add node command");
-		return svc.addNode();
-	}
+    @Put("/node/add")
+    public async nodeAdd(): Promise<boolean> {
+        logger.debug("add node command");
+        return svc.addNode();
+    }
 
-	@Put("/network/heal")
-	public async healNetwork(): Promise<boolean> {
-		logger.debug("heal node command");
-		return svc.healNetwork();
-	}
+    @Put("/node/remove")
+    public async nodeRemove(): Promise<boolean> {
+        logger.debug("remove node command");
+        return svc.removeNode();
+    }
+
+    @Put("/network/heal")
+    public async healNetwork(): Promise<boolean> {
+        logger.debug("heal node command");
+        return svc.healNetwork();
+    }
 
 
-	@Put("/cancel")
-	public async cancelCommand(): Promise<boolean> {
-		logger.debug("cancelling command");
-		return svc.cancelCommand();
-	}
+    @Put("/cancel")
+    public async cancelCommand(): Promise<boolean> {
+        logger.debug("cancelling command");
+        return svc.cancelCommand();
+    }
 
 
-	@Get("/status")
-	public async getCommandStatus(): Promise<CommandStatus> {
-		logger.debug("get command status");
-		return svc.getStatus();
-	}
+    @Get("/status")
+    public async getCommandStatus(): Promise<CommandStatus> {
+        logger.debug("get command status");
+        return svc.getStatus();
+    }
 }

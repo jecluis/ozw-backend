@@ -94,6 +94,71 @@
 				"type": "object",
 				"additionalProperties": false
 			},
+			"ZWaveConfig": {
+				"properties": {
+					"device": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"device"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"BackendConfig": {
+				"properties": {
+					"http": {
+						"properties": {
+							"port": {
+								"type": "number",
+								"format": "double"
+							},
+							"host": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"port",
+							"host"
+						],
+						"type": "object"
+					},
+					"zwave": {
+						"$ref": "#/components/schemas/ZWaveConfig"
+					},
+					"prometheus": {
+						"properties": {
+							"url": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"url"
+						],
+						"type": "object"
+					}
+				},
+				"required": [
+					"http",
+					"zwave",
+					"prometheus"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
+			"APIConfigItem": {
+				"properties": {
+					"config": {
+						"$ref": "#/components/schemas/BackendConfig"
+					}
+				},
+				"required": [
+					"config"
+				],
+				"type": "object",
+				"additionalProperties": false
+			},
 			"OZWDriverStatus": {
 				"properties": {
 					"is_connected": {
@@ -743,6 +808,25 @@
 				"parameters": []
 			}
 		},
+		"/api/command/node/remove": {
+			"put": {
+				"operationId": "NodeRemove",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			}
+		},
 		"/api/command/network/heal": {
 			"put": {
 				"operationId": "HealNetwork",
@@ -798,6 +882,52 @@
 				},
 				"security": [],
 				"parameters": []
+			}
+		},
+		"/api/config": {
+			"get": {
+				"operationId": "GetConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/APIConfigItem"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": []
+			},
+			"post": {
+				"operationId": "SetConfig",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/APIConfigItem"
+							}
+						}
+					}
+				}
 			}
 		},
 		"/api/network/status": {
@@ -1116,6 +1246,100 @@
 			},
 			"post": {
 				"operationId": "SetValueByID",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "valueid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ValueSetRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/nodes/{id}/values/button/{valueid}/press": {
+			"post": {
+				"operationId": "SetButtonPressedByID",
+				"responses": {
+					"200": {
+						"description": "Ok",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "boolean"
+								}
+							}
+						}
+					}
+				},
+				"security": [],
+				"parameters": [
+					{
+						"in": "path",
+						"name": "id",
+						"required": true,
+						"schema": {
+							"format": "double",
+							"type": "number"
+						}
+					},
+					{
+						"in": "path",
+						"name": "valueid",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					}
+				],
+				"requestBody": {
+					"required": true,
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ValueSetRequest"
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/nodes/{id}/values/button/{valueid}/release": {
+			"post": {
+				"operationId": "SetButtonReleasedByID",
 				"responses": {
 					"200": {
 						"description": "Ok",

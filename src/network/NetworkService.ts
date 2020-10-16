@@ -9,7 +9,7 @@
 
 import { ZWaveDriver } from '../driver/ZWaveDriver';
 import ZWave, {
-	NodeInfo, Value, Notification, ValueGenre
+	NodeInfo, Value, Notification, ValueGenre, ValueId
 } from 'openzwave-shared';
 import { Datastore } from './Datastore';
 import { Logger } from 'tslog';
@@ -337,6 +337,35 @@ export class NetworkService {
 		let driver: ZWave = ZWaveDriver.getDriver();
 		driver.setNodeName(nodeid, name);
 	}
+
+	public setButtonPressed(button: ValueSetRequest) {
+		logger.debug("press button ", button);
+		let driver: ZWave = ZWaveDriver.getDriver();
+		let valueid: ValueId = {
+			node_id: button.node_id,
+			class_id: button.class_id,
+			instance: button.instance,
+			index: button.index
+		}
+		driver.setChangeVerified(valueid, true);
+		driver.pressButton(valueid);
+		driver.setChangeVerified(valueid, false);
+	}
+
+	public setButtonReleased(button: ValueSetRequest) {
+		logger.debug("press button ", button);
+		let driver: ZWave = ZWaveDriver.getDriver();
+		let valueid: ValueId = {
+			node_id: button.node_id,
+			class_id: button.class_id,
+			instance: button.instance,
+			index: button.index
+		}
+		driver.setChangeVerified(valueid, true);
+		driver.releaseButton(valueid);
+		driver.setChangeVerified(valueid, false);
+	}
+
 
 	getStatus(): NetworkStatus {
 		this._updateStatus();
