@@ -10,8 +10,9 @@
 import ZWave from 'openzwave-shared';
 import { Logger } from 'tslog';
 import { ENOENT, ENODEV } from 'constants';
-import { ConfigService } from './ConfigService';
+import { BackendConfig, ConfigService } from './ConfigService';
 import fs from 'fs';
+import { Driver } from './Driver';
 
 
 const logger: Logger = new Logger({name: "zwave-driver"});
@@ -27,7 +28,7 @@ export interface OZWDriverStatus {
 }
 
 
-export class ZWaveDriver {
+export class ZWaveDriver extends Driver {
 
     private static instance: ZWaveDriver;
 
@@ -42,6 +43,8 @@ export class ZWaveDriver {
     };
 
     private constructor() {
+        super("zwave", true);
+
         this._zwave = new ZWave({
             UserPath: './zwave.db',
             ConfigPath: './zwave.db',
@@ -105,9 +108,10 @@ export class ZWaveDriver {
     }
 
     private _deviceExists(): boolean {
-        const cfg = ConfigService.getConfig();
-
-        if (!fs.existsSync(cfg.zwave.device)) {
+        if (!this.hasConfig()) {
+            return false;
+        }
+        if (!fs.existsSync(this._config.zwave.device)) {
             return false;
         }
         return true;
@@ -136,41 +140,54 @@ export class ZWaveDriver {
         return (!!candidate ? candidate : "");
     }
 
-    start(): number {
+    protected _startup(): boolean {
         logger.info("start zwave driver");
         if (this._status.is_connected) {
             // we're done here, let's move on.
             logger.debug("attempted to start a connected network.");
-            return 0;
+            return true;
         }
 
-        const config = ConfigService.getConfig();
-        if (config.zwave.device === "") {
+        const config = this._config;
+        if (Object.keys(this._config).length === 0) {
+            this.logger.error("can't start with an empty config!!");
+            return false;
+        }
+
+        const has_config = (
+            Object.keys(this._config.zwave).length > 0 &&
+            this._config.zwave.device !== ""
+        );
+        if (!has_config) {
             logger.info("device not specified in config; find best match");
-            config.zwave.device = this._getCandidateDevice();
+            config.zwave = {
+                device: this._getCandidateDevice()
+            };
         }
 
         if (config.zwave.device === "") {
             logger.error("zwave device not specified");
-            return -ENODEV;
+            // return -ENODEV;
+            return false;
         }
 
         if (!this._deviceExists()) {
             logger.error(
                 `zwave device at '${config.zwave.device} does not exist`);
-            return -ENOENT;
+            // return -ENOENT;
+            return false;
         }
 
         this._zwave.connect(config.zwave.device);
         this._status.device = config.zwave.device;
-        return 0;
+        return true;
     }
 
-    stop(): void {
+    protected _shutdown(): boolean {
         logger.info("stop zwave driver");
-        if (!this._status.is_connected) {
+        if (this.isRunning() || !this._status.is_connected) {
             // we're done here, move on.
-            return;
+            return true;
         }
         this._zwave.disconnect(this._status.device);
         this._status = {
@@ -181,23 +198,41 @@ export class ZWaveDriver {
             is_db_ready: false,
             is_scan_complete: false
         };
+        return true;
     }
 
-    getStatus(): OZWDriverStatus {
+    protected _shouldUpdateConfig(config: BackendConfig): boolean {
+        const is_empty_config = (
+            Object.keys(config).length === 0 ||
+            Object.keys(config.zwave).length === 0 ||
+            !config.zwave.device || config.zwave.device === ""
+        );
+
+        if (this.isRunning() &&
+            (is_empty_config || config.zwave.device !== this._status.device)
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    protected _updatedConfig(): void { }
+
+    public getStatus(): OZWDriverStatus {
         return this._status;
     }
 
-    getAvailableDevices(): string[] {
+    public getAvailableDevices(): string[] {
         return this._findCandidateDevices();
     }
 
-    isReady(): boolean {
+    public isReady(): boolean {
         const s = this._status;
         return (s.is_connected && s.is_ready &&
                 s.is_db_ready && s.is_scan_complete);
     }
 
-    getDriver(): ZWave {
+    public getDriver(): ZWave {
         return this._zwave;
     }
 }

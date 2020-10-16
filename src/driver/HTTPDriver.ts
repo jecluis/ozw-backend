@@ -15,23 +15,22 @@ import express, {
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import fs from 'fs';
-import { Logger } from 'tslog';
 import { Server } from 'http';
-import { ConfigService, BackendConfig } from './ConfigService';
+import { BackendConfig } from './ConfigService';
 import express_prom_bundle, * as promBundle from 'express-prom-bundle';
+import { Driver } from './Driver';
 
 
-const logger: Logger = new Logger({name: 'http-driver'});
-const config: BackendConfig = ConfigService.getConfig();
-
-
-export class HTTPDriver {
+export class HTTPDriver extends Driver {
 
     private static instance: HTTPDriver;
     private httpApp = express();
     private httpServer?: Server = undefined;
+    private _http_host?: string = undefined;
+    private _http_port?: number = undefined;
 
     private constructor() {
+        super("http", true);
         this.httpApp.use(cors());
         this.httpApp.use(bodyParser.urlencoded({extended: true}));
         this.httpApp.use(bodyParser.json());
@@ -55,17 +54,58 @@ export class HTTPDriver {
         return HTTPDriver.instance;
     }
 
-    startup(): void {
-        logger.info("starting http server");
-        const host = config.http.host;
-        const port = config.http.port;
-        this.httpServer = this.httpApp.listen(port, host);
+    public _startup(): boolean {
+        if (Object.keys(this._config.http).length === 0) {
+            this.logger.error("http config not available");
+            return false;
+        }
+        if (!this._config.http.host || this._config.http.host === "") {
+            this.logger.error("http host config not provided");
+            return false;
+        }
+        if (!this._config.http.port || this._config.http.port <= 0) {
+            this.logger.error("http port config not provided or incorrect");
+            return false;
+        }
+        this._http_host = this._config.http.host;
+        this._http_port = this._config.http.port;
+        this.httpServer = this.httpApp.listen(this._http_port, this._http_host);
+        if (!this.httpServer) {
+            this.logger.error("unable to start http driver");
+            return false;
+        }
+        return true;
     }
 
-    shutdown(): void {
-        logger.info("shutting down http server");
+    public _shutdown(): boolean {
+        this.logger.info("shutting down http server");
+        if (!this.isRunning()) {
+            this.logger.info("server not running");
+            return true;
+        }
         this.httpServer?.close(() => {
-            logger.info("closed http server");
+            this.logger.info("closed http server");
         });
+        return true;
+    }
+
+    protected _shouldUpdateConfig(config: BackendConfig): boolean {
+        return (
+            Object.keys(config).length > 0 &&
+            Object.keys(config.http).length > 0 &&
+            !!config.http.host && config.http.host !== "" &&
+            !!config.http.port && config.http.port > 0 &&
+            (
+                config.http.host !== this._http_host ||
+                config.http.port !== this._http_port
+            )
+        );
+    }
+
+    protected _updatedConfig(): void {
+        this.logger.info("updated config, restart.");
+        if (!this.restart()) {
+            this.logger.error("error restarting http driver");
+        }
     }
 }

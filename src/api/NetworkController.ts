@@ -16,7 +16,6 @@ import {
 import { Logger } from 'tslog';
 import { ZWaveDriver, OZWDriverStatus } from '../driver/ZWaveDriver';
 import { ENOENT, ENODEV } from 'constants';
-import { ConfigService } from '../driver/ConfigService';
 import { SimpleReply } from './types';
 import { NetworkService, NetworkStatus } from '../network/NetworkService';
 
@@ -57,11 +56,16 @@ export class NetworkController extends Controller {
     public async startNetwork(): Promise<SimpleReply> {
         logger.debug("start network");
         svc.start();
-        const err = driver.start();
         let errstr = "success";
+        let res = true;
+        if (!driver.startup()) {
+            errstr = "error starting up zwave network";
+            res = false;
+        }
+        /*
         if (err < 0) {
             if (err === -ENOENT) {
-                const cfg = ConfigService.getConfig();
+                const cfg = ConfigService.getConfigOneTime();
                 errstr = `no such device '${cfg.zwave.device}'`;
             } else if (err === -ENODEV) {
                 errstr = "device not specified";
@@ -69,15 +73,16 @@ export class NetworkController extends Controller {
                 errstr = "unknown internal error";
             }
         }
+        */
         return {
-            rc: err,
+            rc: (res ? 0 : -1),
             str: errstr
         };
     }
 
     @Post('/stop')
     public async stopNetwork(): Promise<SimpleReply> {
-        driver.stop();
+        driver.shutdown();
         svc.stop();
         return {
             rc: 0,

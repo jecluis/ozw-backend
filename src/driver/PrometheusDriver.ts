@@ -8,8 +8,9 @@
  */
 
 import * as promClient from 'prom-client';
+import { Driver } from './Driver';
 
-export class PrometheusDriver {
+export class PrometheusDriver extends Driver {
     private static instance: PrometheusDriver;
 
     // private registry: promClient.Registry;
@@ -25,7 +26,10 @@ export class PrometheusDriver {
     });
 
 
-    private constructor() { }
+    private constructor() {
+        super("prometheus", false);
+    }
+
     public static getInstance(): PrometheusDriver {
         if (!PrometheusDriver.instance) {
             PrometheusDriver.instance = new PrometheusDriver();
@@ -38,6 +42,10 @@ export class PrometheusDriver {
         inst.put(nodeid, unit, value);
     }
 
+    protected _startup(): boolean { return true; }
+    protected _shutdown(): boolean { return true; }
+    protected _shouldUpdateConfig(): boolean { return true; }
+    protected _updatedConfig(): void { }
 
     public put(nodeid: number, unit: string, value: number): void {
 
