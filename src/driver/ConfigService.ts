@@ -8,6 +8,7 @@
  */
 import fs from 'fs';
 import { BehaviorSubject } from 'rxjs';
+import { Logger } from 'tslog';
 
 export interface BackendConfig {
     http: {
@@ -15,12 +16,21 @@ export interface BackendConfig {
         port: number;
     };
     zwave: ZWaveConfig;
+    prometheus: {
+        url: string;
+    };
 }
 
 export interface ZWaveConfig {
     device: string;
 }
 
+
+export abstract class ConfigValidator {
+    public abstract validConfig(config: BackendConfig): boolean;
+}
+
+const logger: Logger = new Logger({name: "config-svc"});
 
 export class ConfigService {
 
@@ -32,9 +42,13 @@ export class ConfigService {
         },
         zwave: {
             device: ""
+        },
+        prometheus: {
+            url: ""
         }
     };
     private _config = {} as BackendConfig;
+    private _validators: ConfigValidator[] = [];
 
     _config_update: BehaviorSubject<BackendConfig>;
 
@@ -56,6 +70,10 @@ export class ConfigService {
 
     public static getConfigOneTime(): BackendConfig {
         return ConfigService.getInstance().getConfigOneTime();
+    }
+
+    public static registerValidator(validator: ConfigValidator): void {
+        return ConfigService.getInstance().registerValidator(validator);
     }
 
     private _updateAll(): void {
@@ -88,6 +106,31 @@ export class ConfigService {
     public store(): void {
         this._store();
         this._updateAll();
+    }
+
+    public registerValidator(validator: ConfigValidator): void {
+        this._validators.push(validator);
+    }
+
+    public setConfig(config: BackendConfig): boolean {
+        let valid: boolean = true;
+        if (this._validators.length === 0) {
+            logger.info("no validators, refuse setting config.");
+            return false;
+        }
+        this._validators.forEach( (validator: ConfigValidator) => {
+            if (!validator.validConfig(config)) {
+                logger.info("invalid config, don't set.");
+                valid = false;
+            }
+        });
+        if (!valid) {
+            return false;
+        }
+        logger.info("set config");
+        this._config = config;
+        this.store();
+        return true;
     }
 
     public getConfig(): BehaviorSubject<BackendConfig> {

@@ -8,10 +8,10 @@
  */
 
 import { Logger } from 'tslog';
-import { BackendConfig, ConfigService } from "./ConfigService";
+import { BackendConfig, ConfigService, ConfigValidator } from "./ConfigService";
 
 
-export abstract class Driver {
+export abstract class Driver extends ConfigValidator {
 
     protected logger: Logger;
     protected _config: BackendConfig = {} as BackendConfig;
@@ -23,10 +23,12 @@ export abstract class Driver {
         protected _driver_name: string,
         private _always_requires_config: boolean
     ) {
+        super();
         this.logger = new Logger({name: `driver-${_driver_name}`});
         ConfigService.getConfig().subscribe(
             this._handleUpdateConfig.bind(this)
         );
+        ConfigService.registerValidator(this);
     }
 
     private _handleUpdateConfig(config: BackendConfig): void {
@@ -106,6 +108,16 @@ export abstract class Driver {
             return false;
         }
         return true;
+    }
+
+    public validConfig(config: BackendConfig): boolean {
+        const res: boolean = this._shouldUpdateConfig(config);
+        if (!res) {
+            this.logger.info(`config not valid for driver ${this.driverName}`);
+        } else {
+            this.logger.info(`config valid for driver ${this.driverName}`);
+        }
+        return res;
     }
 
     protected abstract _startup(): boolean;
