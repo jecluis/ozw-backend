@@ -11,6 +11,7 @@ import { HTTPDriver } from "./driver/HTTPDriver";
 import { sleep } from './utils';
 import { ZWaveDriver } from './driver/ZWaveDriver';
 import { Logger } from 'tslog';
+import { KVStore } from './kvstore/KVStore';
 
 
 const logger: Logger = new Logger({name: 'ozw-backend'});
@@ -25,6 +26,7 @@ process.on('SIGINT', () => {
 
 async function main(): Promise<void> {
     try {
+        const kvstore = KVStore.open("ozwbackend.db");
         const http = HTTPDriver.getInstance();
         const zwave = ZWaveDriver.getInstance();
         logger.info("starting up...");
